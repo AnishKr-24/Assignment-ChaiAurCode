@@ -47,5 +47,91 @@
  *   //      frequentContact: "Swiggy", allAbove100: false, hasLargeTransaction: true }
  */
 export function analyzeUPITransactions(transactions) {
-  // Your code here
+  // ✅ Validation
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    return null;
+  }
+
+  // ✅ Filter valid transactions
+  const valid = transactions.filter(t =>
+    t &&
+    (t.type === "credit" || t.type === "debit") &&
+    typeof t.amount === "number" &&
+    t.amount >= 0
+  );
+
+  if (valid.length === 0) return null;
+
+  // ✅ Totals
+  let totalCredit = 0;
+  let totalDebit = 0;
+  let totalAmount = 0;
+
+  // ✅ Helpers
+  const categoryBreakdown = {};
+  const contactCount = {};
+
+  let highestTransaction = valid[0];
+
+  for (let t of valid) {
+    // Credit / Debit
+    if (t.type === "credit") totalCredit += t.amount;
+    if (t.type === "debit") totalDebit += t.amount;
+
+    totalAmount += t.amount;
+
+    // Highest transaction
+    if (t.amount > highestTransaction.amount) {
+      highestTransaction = t;
+    }
+
+    // Category breakdown
+    if (categoryBreakdown[t.category]) {
+      categoryBreakdown[t.category] += t.amount;
+    } else {
+      categoryBreakdown[t.category] = t.amount;
+    }
+
+    // Contact frequency
+    if (contactCount[t.to]) {
+      contactCount[t.to]++;
+    } else {
+      contactCount[t.to] = 1;
+    }
+  }
+
+  // ✅ Net Balance
+  const netBalance = totalCredit - totalDebit;
+
+  // ✅ Avg Transaction
+  const avgTransaction = Math.round(totalAmount / valid.length);
+
+  // ✅ Frequent Contact
+  let frequentContact = null;
+  let maxCount = 0;
+
+  for (let contact in contactCount) {
+    if (contactCount[contact] > maxCount) {
+      maxCount = contactCount[contact];
+      frequentContact = contact;
+    }
+  }
+
+  // ✅ Boolean checks
+  const allAbove100 = valid.every(t => t.amount > 100);
+  const hasLargeTransaction = valid.some(t => t.amount >= 5000);
+
+  // ✅ Final Object
+  return {
+    totalCredit,
+    totalDebit,
+    netBalance,
+    transactionCount: valid.length,
+    avgTransaction,
+    highestTransaction,
+    categoryBreakdown,
+    frequentContact,
+    allAbove100,
+    hasLargeTransaction
+  };
 }

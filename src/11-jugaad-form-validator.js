@@ -61,6 +61,68 @@
  *   })
  *   // => { isValid: false, errors: { name: "...", email: "...", ... } }
  */
-export function validateForm(formData) {
-  // Your code here
+export function validateForm(form) {
+  const errors = {};
+
+
+  const name = (form.name ?? "").trim();
+  if (name.length < 2 || name.length > 50) {
+    errors.name = "Name must be 2-50 characters";
+  }
+
+
+  const email = form.email ?? "";
+  const emailParts = email.split("@");
+
+  if (
+    emailParts.length !== 2 ||
+    !emailParts[1].includes(".")
+  ) {
+    errors.email = "Invalid email format";
+  }
+
+
+  const phone = form.phone ?? "";
+  const phoneRegex = /^[6-9]\d{9}$/;
+
+  if (!phoneRegex.test(phone)) {
+    errors.phone = "Invalid Indian phone number";
+  }
+
+ 
+  let age = parseInt(form.age);
+
+  if (
+    isNaN(age) ||
+    age < 16 ||
+    age > 100 ||
+    age !== Number(form.age)
+  ) {
+    errors.age = "Age must be an integer between 16 and 100";
+  }
+
+
+  const pincode = form.pincode ?? "";
+  const pinRegex = /^[1-9]\d{5}$/;
+
+  if (!pinRegex.test(pincode)) {
+    errors.pincode = "Invalid Indian pincode";
+  }
+
+ 
+  const state = form.state ?? "";
+  if (!state) {
+    errors.state = "State is required";
+  }
+
+
+  if (!form.agreeTerms) {
+    errors.agreeTerms = "Must agree to terms";
+  }
+
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
 }
